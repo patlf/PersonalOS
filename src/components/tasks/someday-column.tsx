@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { UnifiedTaskContainer } from './unified-task-container';
 import { DroppableArea } from './droppable-area';
 import { Task } from '@/lib/types';
@@ -18,15 +19,42 @@ interface SomedayColumnProps {
   className?: string;
 }
 
-export function SomedayColumn({ 
-  tasks, 
+export function SomedayColumn({
+  tasks,
   onOpenCreateModal,
-  onTaskClick, 
+  onTaskClick,
   onToggleComplete,
   isLoading = false,
-  className 
+  className
 }: SomedayColumnProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Separate overdue and someday tasks
+  const { overdueTasks, somedayTasks } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const overdue: Task[] = [];
+    const someday: Task[] = [];
+
+    tasks.forEach(task => {
+      if (task.status === 'completed') return; // Skip completed tasks
+
+      if (task.scheduledDate && task.status !== 'someday') {
+        const taskDate = new Date(task.scheduledDate);
+        taskDate.setHours(0, 0, 0, 0);
+        if (taskDate < today) {
+          overdue.push(task);
+        } else {
+          someday.push(task);
+        }
+      } else {
+        someday.push(task);
+      }
+    });
+
+    return { overdueTasks: overdue, somedayTasks: someday };
+  }, [tasks]);
 
 
 
@@ -47,10 +75,10 @@ export function SomedayColumn({
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </Button>
         </div>
-        
+
         <div className="flex-1 flex items-center justify-center">
           <div className="writing-mode-vertical text-sm font-medium text-muted-foreground transform rotate-180">
-            Someday ({tasks.length})
+            Someday ({somedayTasks.length + overdueTasks.length})
           </div>
         </div>
       </div>
@@ -65,10 +93,10 @@ export function SomedayColumn({
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold text-foreground">Someday</h2>
             <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              {tasks.length}
+              {somedayTasks.length + overdueTasks.length}
             </span>
           </div>
-          
+
           <div className="flex items-center gap-1">
             {onOpenCreateModal && (
               <Button
@@ -96,41 +124,96 @@ export function SomedayColumn({
       {/* Content */}
       <div className="flex-1 p-4 overflow-hidden relative">
         <div className="h-full flex flex-col space-y-4">
-          {/* Add Task Button */}
-          <div className="flex-shrink-0">
-            {onOpenCreateModal && (
-              <Button
-                variant="outline"
-                onClick={() => onOpenCreateModal(undefined, 'Add task to Someday')}
-                className="w-full justify-start text-muted-foreground border-border hover:bg-muted rounded-xl h-12"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add a task to Someday...
-              </Button>
-            )}
-          </div>
-          
-          {/* Task List */}
-          <div className="flex-1 overflow-hidden">
+
+
+          {/* Task Lists */}
+          <div className="flex-1 overflow-hidden flex flex-col space-y-4">
             {isLoading ? (
               <div className="flex items-center justify-center h-32">
                 <div className="text-sm text-muted-foreground">Loading tasks...</div>
               </div>
             ) : (
-              <DroppableArea 
-                id="someday"
-                className="h-full"
-              >
-                <UnifiedTaskContainer
-                  containerId="someday"
-                  tasks={tasks}
-                  onTaskClick={onTaskClick}
-                  onToggleComplete={onToggleComplete}
-                  className="h-full overflow-y-auto pr-2 -mr-2"
-                  emptyMessage="No tasks in Someday. Click the + button to add your first task!"
-                  enableSorting={true}
-                />
-              </DroppableArea>
+              <>
+                {/* Overdue Tasks Section */}
+                {overdueTasks.length > 0 && (
+                  <div className="flex-shrink-0">
+                    <DroppableArea
+                      id="overdue"
+                      className="relative"
+                      activeClassName="border-destructive/50 bg-destructive/5"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-destructive">Overdue</h3>
+                        <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive border border-destructive/20">
+                          {overdueTasks.length}
+                        </span>
+                      </div>
+                      <UnifiedTaskContainer
+                        containerId="overdue"
+                        tasks={overdueTasks.sort((a, b) => {
+                          // Sort by scheduled date (oldest first)
+                          if (!a.scheduledDate || !b.scheduledDate) return 0;
+                          return new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime();
+                        })}
+                        onTaskClick={onTaskClick}
+                        onToggleComplete={onToggleComplete}
+                        className="space-y-2"
+                        emptyMessage="No overdue tasks"
+                        enableSorting={false}
+                        isOverdueContainer={true}
+                      />
+                    </DroppableArea>
+                  </div>
+                )}
+
+                {/* Separator between Overdue and Someday */}
+                {overdueTasks.length > 0 && somedayTasks.length > 0 && (
+                  <div className="flex-shrink-0">
+                    <Separator className="my-2" />
+                  </div>
+                )}
+
+                {/* Someday Tasks Section */}
+                <div className="flex-1 overflow-hidden">
+                  <DroppableArea
+                    id="someday"
+                    className="h-full"
+                  >
+                    <div className="h-full flex flex-col">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-foreground">Someday</h3>
+                        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                          {somedayTasks.length}
+                        </span>
+                      </div>
+                      
+                      {/* Add Task Button for Someday */}
+                      {onOpenCreateModal && (
+                        <div className="mb-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onOpenCreateModal(undefined, 'Add task to Someday')}
+                            className="w-full text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 h-8 px-2 border border-dashed border-muted-foreground/30 hover:border-muted-foreground/50 rounded-lg"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add task
+                          </Button>
+                        </div>
+                      )}
+                      <UnifiedTaskContainer
+                        containerId="someday"
+                        tasks={somedayTasks}
+                        onTaskClick={onTaskClick}
+                        onToggleComplete={onToggleComplete}
+                        className="flex-1 overflow-y-auto pr-2 -mr-2"
+                        emptyMessage="No tasks in Someday. Click the + button to add your first task!"
+                        enableSorting={true}
+                      />
+                    </div>
+                  </DroppableArea>
+                </div>
+              </>
             )}
           </div>
         </div>

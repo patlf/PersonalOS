@@ -15,16 +15,18 @@ interface EnhancedTaskCardProps {
   isDragging?: boolean;
   compact?: boolean;
   draggable?: boolean;
+  isOverdue?: boolean;
 }
 
-const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({ 
-  task, 
-  onClick, 
+const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
+  task,
+  onClick,
   onToggleComplete,
-  className, 
-  isDragging = false, 
-  compact = false, 
+  className,
+  isDragging = false,
+  compact = false,
   draggable = true,
+  isOverdue = false,
 }: EnhancedTaskCardProps) {
   const priorityIndicators = useMemo(() => ({
     low: 'border-l-muted-foreground/30',
@@ -55,41 +57,53 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
       className={cn(
         cardStyles({ variant: 'task', padding: compact ? 'xs' : 'sm' }),
         'group relative transform-gpu will-change-transform',
-        priorityIndicators[task.priority],
-        
+        // Priority indicators - overridden by overdue styling if applicable
+        !isOverdue && priorityIndicators[task.priority],
+
         // Base transitions - smooth and responsive
         'transition-all duration-300 ease-out',
-        
+
         // Simple dragging state
         isDragging && 'opacity-50',
-        
-        // Completed task styling
-        isCompleted && [
+
+        // Overdue task styling - stronger red background and border
+        isOverdue && !isCompleted && [
+          'bg-red-100',
+          '!border-red-300',
+        ],
+
+        // Completed task styling - but not for overdue tasks to preserve red styling
+        isCompleted && !isOverdue && [
           'opacity-60',
           'bg-muted/50',
           'border-muted-foreground/30'
         ],
-        
+
+        // Completed overdue task styling - lighter opacity to show it's done but keep red theme
+        isCompleted && isOverdue && [
+          'opacity-70',
+          'bg-red-50',
+          'border-red-200'
+        ],
+
         // Whole card is draggable and clickable
         draggable && !isCompleted && [
           'cursor-grab active:cursor-grabbing',
-          'hover:shadow-md hover:scale-[1.01]',
-          'hover:-translate-y-0.5',
+          'hover:shadow-md',
           'select-none' // Prevent text selection
         ],
-        
+
         // Click states for non-draggable
         !draggable && onClick && [
           'cursor-pointer',
-          'hover:shadow-md hover:scale-[1.01]',
-          'hover:-translate-y-0.5'
+          'hover:shadow-md'
         ],
-        
+
         className
       )}
       onClick={handleClick}
     >
-      
+
       <div className={cn(compact ? "space-y-1.5" : "space-y-3")}>
         {/* Task Title with Completion Toggle */}
         <div className="flex items-start gap-2">
@@ -99,15 +113,19 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
             className={cn(
               "flex-shrink-0 mt-0.5 w-4 h-4 rounded-full border-2 transition-all duration-200 hover:scale-110",
               "flex items-center justify-center",
-              isCompleted 
-                ? "bg-green-500 border-green-500 text-white hover:bg-green-600" 
-                : "border-muted-foreground/40 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950"
+              isCompleted
+                ? isOverdue
+                  ? "bg-red-300 border-red-300 text-white hover:bg-red-400"
+                  : "bg-green-500 border-green-500 text-white hover:bg-green-600"
+                : isOverdue
+                  ? "!border-red-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950"
+                  : "border-muted-foreground/40 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950"
             )}
             title={isCompleted ? "Mark as incomplete" : "Mark as complete"}
           >
             {isCompleted && <Check className="w-2.5 h-2.5" />}
           </button>
-          
+
           <h3 className={cn(
             "font-medium text-card-foreground leading-tight line-clamp-2 flex-1 transition-colors duration-200",
             isCompleted && "text-muted-foreground",
@@ -117,7 +135,7 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
             {task.title}
           </h3>
         </div>
-        
+
         {/* Task Description - hidden in compact mode */}
         {task.description && !compact && (
           <p className={cn(
@@ -140,7 +158,7 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
             // Compact layout - just duration
             task.estimatedDuration > 0 && (
               <div className={cn(
-                badgeStyles({ variant: 'outline', size: 'sm' }), 
+                badgeStyles({ variant: 'outline', size: 'sm' }),
                 "gap-1 px-1.5 py-0.5"
               )}>
                 <Clock className="h-2.5 w-2.5" />
@@ -153,14 +171,14 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
                 {/* Duration Chip */}
                 {task.estimatedDuration > 0 && (
                   <div className={cn(
-                    badgeStyles({ variant: 'outline', size: 'sm' }), 
+                    badgeStyles({ variant: 'outline', size: 'sm' }),
                     "gap-1.5 transition-all duration-200"
                   )}>
                     <Clock className="h-3 w-3" />
                     <span>{task.estimatedDuration}m</span>
                   </div>
                 )}
-                
+
                 {/* Tags */}
                 {task.tags.length > 0 && (
                   <div className="flex items-center gap-1.5">
@@ -199,7 +217,7 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
           )}
         </div>
       </div>
-      
+
 
 
     </div>

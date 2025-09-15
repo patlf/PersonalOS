@@ -54,6 +54,7 @@ function SortableTaskItem({
         'touch-none',
         isDragging && 'opacity-50 z-50'
       )}
+      suppressHydrationWarning
       {...attributes}
       {...listeners}
     >
@@ -102,6 +103,7 @@ export function SortableTaskList({
       <div 
         className={cn('space-y-2', className)}
         data-container-id={containerId}
+        suppressHydrationWarning
       >
         {visibleTasks.map((task, index) => {
           const items = [];

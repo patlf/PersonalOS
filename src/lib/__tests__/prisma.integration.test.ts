@@ -1,37 +1,35 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-
-// Use a separate test database instance
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-})
+import { testPrisma as prisma, cleanDatabase } from '@/test/integration-setup'
 
 describe('Database Integration Tests', () => {
   let testUserId: string
 
   beforeEach(async () => {
     // Clean up and create test user
-    await prisma.task.deleteMany()
-    await prisma.user.deleteMany()
-    
-    const user = await prisma.user.create({
-      data: {
-        email: 'test-integration@example.com',
-        name: 'Test Integration User',
-        preferences: { theme: 'light' }
-      }
-    })
-    testUserId = user.id
+    try {
+      await cleanDatabase()
+      
+      const user = await prisma.user.create({
+        data: {
+          email: 'test-integration@example.com',
+          name: 'Test Integration User',
+          preferences: { theme: 'light' }
+        }
+      })
+      testUserId = user.id
+    } catch (error) {
+      console.error('Setup failed:', error)
+      throw error
+    }
   })
 
   afterEach(async () => {
     // Clean up after each test
-    await prisma.task.deleteMany()
-    await prisma.user.deleteMany()
+    try {
+      await cleanDatabase()
+    } catch (error) {
+      console.error('Cleanup failed:', error)
+    }
   })
 
   describe('User Operations', () => {

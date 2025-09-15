@@ -35,8 +35,9 @@ describe("Auth Configuration", () => {
 
   it("should have correct auth configuration", () => {
     expect(authOptions).toBeDefined()
-    expect(authOptions.providers).toHaveLength(1)
+    expect(authOptions.providers).toHaveLength(2)
     expect(authOptions.providers[0].id).toBe("google")
+    expect(authOptions.providers[1].id).toBe("credentials")
     expect(authOptions.session?.strategy).toBe("jwt")
   })
 

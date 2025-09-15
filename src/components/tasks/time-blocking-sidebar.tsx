@@ -21,24 +21,24 @@ interface TimeBlockingSidebarProps {
   className?: string;
 }
 
-export function TimeBlockingSidebar({ 
-  todayTasks, 
+export function TimeBlockingSidebar({
+  todayTasks,
   onTaskClick,
   onToggleComplete,
-  className 
+  className
 }: TimeBlockingSidebarProps) {
   // Generate time slots for business hours (6 AM to 11 PM)
   const timeSlots: TimeSlot[] = [];
   for (let hour = 6; hour <= 23; hour++) {
     const timeString = `${hour.toString().padStart(2, '0')}:00`;
-    
+
     // Find all tasks scheduled for this hour (any task with scheduledTime in this hour)
     const hourTasks = todayTasks.filter(task => {
       if (!task.scheduledTime) return false;
       const [taskHour] = task.scheduledTime.split(':').map(Number);
       return taskHour === hour;
     });
-    
+
     timeSlots.push({
       time: timeString,
       hour,
@@ -64,29 +64,24 @@ export function TimeBlockingSidebar({
     <div className={cn("flex flex-col h-full bg-background", className)}>
       {/* Header */}
       <div className="p-4 border-b border-border bg-card/50">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-8">
           <h2 className="text-lg font-semibold text-foreground">Today&apos;s Schedule</h2>
           <div className="text-xs text-muted-foreground">
-            {today.toLocaleDateString('en-US', { 
-              weekday: 'short', 
-              month: 'short', 
-              day: 'numeric' 
+            {today.toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric'
             })}
           </div>
         </div>
-        {isToday(today) && (
-          <Badge variant="secondary" className="text-xs mt-2">
-            Today
-          </Badge>
-        )}
       </div>
-      
+
       {/* Calendar Day View */}
       <div className="flex-1 overflow-auto bg-background">
         {timeSlots.map((slot) => {
           const slotId = `timeslot-${getTodayDateString()}-${slot.time.replace(':', '-')}`;
           const hasItems = slot.tasks.length > 0;
-          
+
           return (
             <DroppableArea
               key={slot.time}
@@ -117,7 +112,7 @@ export function TimeBlockingSidebar({
                       className="space-y-1"
                     />
                   )}
-                  
+
                   {/* Empty state - invisible but maintains droppable area */}
                   {!hasItems && (
                     <div className="h-full min-h-[46px] w-full" />

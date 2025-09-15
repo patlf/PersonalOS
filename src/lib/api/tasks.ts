@@ -1,5 +1,27 @@
 import { Task, CreateTaskInput, UpdateTaskInput, TaskFilters } from '@/lib/types';
 
+// Helper function to parse dates safely, avoiding timezone issues
+function parseDateSafely(dateString: string): Date {
+  // If it's already a Date object, return it
+  if (dateString instanceof Date) {
+    return dateString;
+  }
+  
+  // If it's an ISO string (YYYY-MM-DDTHH:mm:ss.sssZ), parse it normally
+  if (typeof dateString === 'string' && dateString.includes('T')) {
+    return new Date(dateString);
+  }
+  
+  // If it's a date-only string (YYYY-MM-DD), parse it in local timezone
+  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+  
+  // Fallback to normal Date parsing
+  return new Date(dateString);
+}
+
 const API_BASE = '/api/tasks';
 
 export class TasksAPI {
@@ -28,10 +50,10 @@ export class TasksAPI {
     
     const tasks = await response.json();
     
-    // Convert date strings back to Date objects
+    // Convert date strings back to Date objects, handling timezone properly
     return tasks.map((task: any) => ({
       ...task,
-      scheduledDate: task.scheduledDate ? new Date(task.scheduledDate) : null,
+      scheduledDate: task.scheduledDate ? parseDateSafely(task.scheduledDate) : null,
       createdAt: new Date(task.createdAt),
       updatedAt: new Date(task.updatedAt),
     }));
@@ -46,10 +68,10 @@ export class TasksAPI {
     
     const task = await response.json();
     
-    // Convert date strings back to Date objects
+    // Convert date strings back to Date objects, handling timezone properly
     return {
       ...task,
-      scheduledDate: task.scheduledDate ? new Date(task.scheduledDate) : null,
+      scheduledDate: task.scheduledDate ? parseDateSafely(task.scheduledDate) : null,
       createdAt: new Date(task.createdAt),
       updatedAt: new Date(task.updatedAt),
     };
@@ -71,10 +93,10 @@ export class TasksAPI {
     
     const task = await response.json();
     
-    // Convert date strings back to Date objects
+    // Convert date strings back to Date objects, handling timezone properly
     return {
       ...task,
-      scheduledDate: task.scheduledDate ? new Date(task.scheduledDate) : null,
+      scheduledDate: task.scheduledDate ? parseDateSafely(task.scheduledDate) : null,
       createdAt: new Date(task.createdAt),
       updatedAt: new Date(task.updatedAt),
     };
@@ -96,10 +118,10 @@ export class TasksAPI {
     
     const task = await response.json();
     
-    // Convert date strings back to Date objects
+    // Convert date strings back to Date objects, handling timezone properly
     return {
       ...task,
-      scheduledDate: task.scheduledDate ? new Date(task.scheduledDate) : null,
+      scheduledDate: task.scheduledDate ? parseDateSafely(task.scheduledDate) : null,
       createdAt: new Date(task.createdAt),
       updatedAt: new Date(task.updatedAt),
     };

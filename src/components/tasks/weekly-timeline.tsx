@@ -263,16 +263,18 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
   // Note: Removed automatic week change during scrolling to prevent jumping
   // Users can scroll freely without timeline regeneration
 
-  // Calculate overdue tasks (exclude completed tasks)
-  const overdueTasks = useMemo(() => {
+  // Filter out overdue tasks from timeline (they're now shown in someday column)
+  const timelineTasks = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     return tasks.filter(task => {
-      if (!task.scheduledDate || task.status === 'completed' || task.status === 'someday') return false;
+      if (task.status === 'completed' || task.status === 'someday') return true;
+      if (!task.scheduledDate) return true;
+      
       const taskDate = new Date(task.scheduledDate);
       taskDate.setHours(0, 0, 0, 0);
-      return taskDate < today;
+      return taskDate >= today; // Only show today and future tasks
     });
   }, [tasks]);
 
@@ -292,8 +294,8 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
       const date = new Date(startDate);
       date.setDate(startDate.getDate() + i);
       
-      // Get all tasks for this date (including completed)
-      const allDayTasks = tasks
+      // Get all tasks for this date (including completed) - use filtered timeline tasks
+      const allDayTasks = timelineTasks
         .filter(task => {
           if (!task.scheduledDate || task.status === 'someday') return false;
           const taskDate = new Date(task.scheduledDate);
@@ -337,7 +339,7 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
     }
 
     return days;
-  }, [tasks]); // Only depend on tasks, not currentWeek
+  }, [timelineTasks]); // Only depend on timeline tasks, not currentWeek
 
   // Format week range for display (show current week range)
   const weekRange = useMemo(() => {
@@ -491,13 +493,6 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Overdue Tasks Indicator */}
-          {overdueTasks.length > 0 && (
-            <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 px-2 py-1 rounded-full border border-destructive/20">
-              <span className="font-medium">{overdueTasks.length} overdue</span>
-            </div>
-          )}
-          
           {/* Past Days Toggle */}
           <Button
             variant={showPastDays ? "default" : "outline"}
@@ -536,44 +531,6 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
 
       {/* Continuous Timeline */}
       <div className="flex-1 flex flex-col bg-gradient-to-br from-background to-muted/20">
-        {/* Overdue Tasks Row */}
-        {overdueTasks.length > 0 && (
-          <div className="p-4 pb-0">
-            <DroppableArea 
-              id="overdue"
-              className="relative"
-              activeClassName="border-destructive/50 bg-destructive/5"
-            >
-              <Card className="p-4 bg-destructive/5 border-destructive/20 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm font-semibold text-destructive">Overdue Tasks</div>
-                    <span className="inline-flex items-center rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive border border-destructive/20">
-                      {overdueTasks.length}
-                    </span>
-                  </div>
-                  <div className="text-xs text-destructive/80">
-                    Drag tasks to reschedule
-                  </div>
-                </div>
-                <UnifiedTaskContainer
-                  id="overdue"
-                  tasks={overdueTasks.sort((a, b) => {
-                    // Sort by scheduled date (oldest first)
-                    if (!a.scheduledDate || !b.scheduledDate) return 0;
-                    return new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime();
-                  })}
-                  onTaskClick={handleTaskClick}
-                  onToggleComplete={onToggleComplete}
-                  enableSorting={false}
-                  emptyMessage="No overdue tasks"
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
-                />
-              </Card>
-            </DroppableArea>
-          </div>
-        )}
-        
         {/* Horizontal Scrolling Timeline */}
         <div 
           ref={scrollContainerRef}

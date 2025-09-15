@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { SomedayColumn } from './someday-column';
 import { WeeklyTimeline, WeeklyTimelineRef } from './weekly-timeline';
@@ -35,8 +35,14 @@ export function TasksView() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [taskModalMode, setTaskModalMode] = useState<'create' | 'edit'>('create');
+  const [isClient, setIsClient] = useState(false);
   const { executeWithErrorHandling } = useTaskErrorHandling();
   const weeklyTimelineRef = useRef<WeeklyTimelineRef>(null);
+
+  // Ensure DND only renders on client to avoid hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   const { isLoading, error: queryError } = useTasks();
   const createTaskMutation = useCreateTask();
@@ -48,9 +54,27 @@ export function TasksView() {
   const error = storeError || queryError;
 
   const filteredTasks = getFilteredTasks();
-  const somedayTasks = filteredTasks.filter(task => 
-    task.status === 'someday' || (!task.scheduledDate && task.status !== 'completed')
-  );
+  
+  // Get all tasks for someday column (including overdue and someday tasks)
+  const somedayTasks = filteredTasks.filter(task => {
+    if (task.status === 'completed') return false;
+    
+    // Include someday tasks
+    if (task.status === 'someday' || (!task.scheduledDate && task.status !== 'completed')) {
+      return true;
+    }
+    
+    // Include overdue tasks
+    if (task.scheduledDate && task.status !== 'someday') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const taskDate = new Date(task.scheduledDate);
+      taskDate.setHours(0, 0, 0, 0);
+      return taskDate < today;
+    }
+    
+    return false;
+  });
   // Get today's tasks for the calendar - include all tasks scheduled for today
   const todayTasks = getTodayTasks().filter(task => task.status !== 'completed');
 
@@ -279,13 +303,8 @@ export function TasksView() {
   };
 
   const handleQuickTaskCreate = () => {
-    // Focus on the someday column input
-    const somedayInput = document.querySelector('[data-testid="task-input"]') as HTMLInputElement;
-    if (somedayInput) {
-      somedayInput.focus();
-      // Scroll into view if needed
-      somedayInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    // Open the task creation modal instead of focusing on someday input
+    openCreateModal();
   };
 
   const handleGlobalSearch = () => {
@@ -319,6 +338,49 @@ export function TasksView() {
     );
   }
 
+  // Show loading state until client-side hydration is complete
+  if (!isClient) {
+    return (
+      <div className="flex h-full bg-muted/30">
+        <div className="w-80 border-r border-border bg-card/50 h-full animate-pulse">
+          <div className="p-4 space-y-4">
+            <div className="h-6 bg-muted rounded"></div>
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-12 bg-muted rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col min-w-0 h-full">
+          <div className="p-4 border-b border-border bg-card/50">
+            <div className="h-6 bg-muted rounded w-32"></div>
+          </div>
+          <div className="flex-1 p-4">
+            <div className="grid grid-cols-7 gap-4 h-full">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 bg-muted rounded"></div>
+                  <div className="h-32 bg-muted rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="w-80 border-l border-border bg-card/50 h-full animate-pulse">
+          <div className="p-4 space-y-4">
+            <div className="h-6 bg-muted rounded"></div>
+            <div className="space-y-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-8 bg-muted rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <TasksErrorBoundary>
       <EnhancedDndProvider 
@@ -344,7 +406,7 @@ export function TasksView() {
             <div className="p-4 border-b border-border bg-card/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-foreground">Tasks</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Timeline</h2>
                   <Button
                     variant="outline"
                     size="sm"

@@ -21,6 +21,7 @@ interface SortableTaskItemProps {
   onToggleComplete?: (taskId: string, completed: boolean) => void;
   className?: string;
   compact?: boolean;
+  isOverdue?: boolean;
 }
 
 function SortableTaskItem({
@@ -29,6 +30,7 @@ function SortableTaskItem({
   onToggleComplete,
   className,
   compact = false,
+  isOverdue = false,
 }: SortableTaskItemProps) {
   const {
     attributes,
@@ -58,6 +60,7 @@ function SortableTaskItem({
         'touch-none transform-gpu will-change-transform',
         isDragging && 'opacity-50 z-50'
       )}
+      suppressHydrationWarning
       {...attributes}
       {...listeners}
     >
@@ -69,6 +72,7 @@ function SortableTaskItem({
         compact={compact}
         draggable={true}
         isDragging={isDragging}
+        isOverdue={isOverdue}
       />
     </div>
   );
@@ -85,6 +89,7 @@ interface UnifiedTaskContainerProps {
   title?: string;
   emptyMessage?: string;
   enableSorting?: boolean;
+  isOverdueContainer?: boolean;
 }
 
 export function UnifiedTaskContainer({
@@ -98,6 +103,7 @@ export function UnifiedTaskContainer({
   title,
   emptyMessage = "No tasks found",
   enableSorting = true,
+  isOverdueContainer = false,
 }: UnifiedTaskContainerProps) {
   // Use containerId or id, whichever is provided
   const actualContainerId = containerId || id || 'default-container';
@@ -197,6 +203,7 @@ export function UnifiedTaskContainer({
                 onToggleComplete={onToggleComplete}
                 compact={compact}
                 className="transform-gpu will-change-transform"
+                isOverdue={isOverdueContainer}
               />
             );
             
@@ -224,7 +231,9 @@ export function UnifiedTaskContainer({
   // The enableSorting prop controls reordering behavior in the drag handlers, not here
   return (
     <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-      {content}
+      <div suppressHydrationWarning>
+        {content}
+      </div>
     </SortableContext>
   );
 }
