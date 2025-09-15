@@ -3,6 +3,7 @@ import { devtools } from 'zustand/middleware';
 import { Task, CreateTaskInput, UpdateTaskInput, TaskFilters } from '@/lib/types';
 import { measurePerformance } from '@/lib/performance';
 import { AppError, ERROR_CODES } from '@/lib/error-handling';
+import { formatDateForId } from '@/lib/date-utils';
 
 interface TaskStore {
   // State
@@ -277,10 +278,10 @@ export const useTaskStore = create<TaskStore>()(
 
       getTasksByDate: measurePerformance((date) => {
         const { tasks } = get();
-        const dateString = date.toISOString().split('T')[0];
+        const dateString = formatDateForId(date);
         return tasks.filter((task) => {
           if (!task.scheduledDate) return false;
-          const taskDateString = task.scheduledDate.toISOString().split('T')[0];
+          const taskDateString = formatDateForId(task.scheduledDate);
           return taskDateString === dateString;
         });
       }, 'task-store-getTasksByDate', 'render'),

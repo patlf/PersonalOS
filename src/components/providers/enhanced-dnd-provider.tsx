@@ -376,6 +376,7 @@ export function EnhancedDndProvider({
         const timeString = `${parts[3]}:${parts[4]}`;
         const targetDate = parseDateFromId(dateString);
         
+
         if (!isNaN(targetDate.getTime())) {
           onTaskMove?.(taskId, targetDate, timeString);
         }

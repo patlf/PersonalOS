@@ -255,7 +255,7 @@ export function MailView() {
         </div>
 
         {/* Coming Soon Overlay */}
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
           <Card className={cn(cardStyles({ variant: 'elevated', padding: 'xl' }), "text-center max-w-md")}>
             <div className="mb-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">

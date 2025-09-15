@@ -152,7 +152,8 @@ export async function PUT(request: NextRequest, context: RouteParams) {
         const timeStr = body.scheduledTime.includes(':') 
           ? (body.scheduledTime.split(':').length === 2 ? `${body.scheduledTime}:00` : body.scheduledTime)
           : `${body.scheduledTime}:00:00`;
-        updateData.scheduledTime = new Date(`1970-01-01T${timeStr}`);
+        // Use UTC to avoid timezone conversion issues
+        updateData.scheduledTime = new Date(`1970-01-01T${timeStr}Z`);
       } else {
         updateData.scheduledTime = null;
       }

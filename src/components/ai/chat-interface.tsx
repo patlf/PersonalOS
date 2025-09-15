@@ -25,21 +25,9 @@ const mockMessages: ChatMessage[] = [
   },
   {
     id: '2',
-    content: 'I&apos;d be happy to help you plan your day! I can analyze your calendar, review your task list, and suggest an optimal schedule. Would you like me to start by checking your upcoming meetings and deadlines?',
+    content: 'I\'d be happy to help you plan your day! I can analyze your calendar, review your task list, and suggest an optimal schedule. Would you like me to start by checking your upcoming meetings and deadlines?',
     role: 'assistant',
     timestamp: new Date(Date.now() - 1000 * 60 * 29)
-  },
-  {
-    id: '3',
-    content: '/task Create presentation for client meeting',
-    role: 'user',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15)
-  },
-  {
-    id: '4',
-    content: 'I&apos;ve created a new task "Create presentation for client meeting" and added it to your task list. Would you like me to schedule time for this task or break it down into smaller subtasks?',
-    role: 'assistant',
-    timestamp: new Date(Date.now() - 1000 * 60 * 14)
   }
 ];
 
@@ -99,7 +87,7 @@ export function ChatInterface() {
               <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
               <h3 className={cn(typographyStyles.h4, "mb-2")}>AI Assistant Coming Soon</h3>
               <p className={cn(typographyStyles.muted, "mb-4")}>
-                We&apos;re building an intelligent assistant that will help you manage tasks, 
+                We're building an intelligent assistant that will help you manage tasks, 
                 schedule events, summarize emails, and optimize your productivity workflow.
               </p>
               <div className={cn("space-y-2", typographyStyles.caption)}>

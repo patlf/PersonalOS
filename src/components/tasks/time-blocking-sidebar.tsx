@@ -83,6 +83,13 @@ export function TimeBlockingSidebar({
   onToggleComplete,
   className
 }: TimeBlockingSidebarProps) {
+  const formatTimeDisplay = (hour: number) => {
+    if (hour === 0) return '12 AM';
+    if (hour < 12) return `${hour} AM`;
+    if (hour === 12) return '12 PM';
+    return `${hour - 12} PM`;
+  };
+
   // Generate time slots for business hours (6 AM to 11 PM)
   const timeSlots: TimeSlot[] = [];
   for (let hour = 6; hour <= 23; hour++) {
@@ -102,13 +109,6 @@ export function TimeBlockingSidebar({
       tasks: hourTasks,
     });
   }
-
-  const formatTimeDisplay = (hour: number) => {
-    if (hour === 0) return '12 AM';
-    if (hour < 12) return `${hour} AM`;
-    if (hour === 12) return '12 PM';
-    return `${hour - 12} PM`;
-  };
 
   const getTodayDateString = () => {
     return formatDateForId(new Date());
