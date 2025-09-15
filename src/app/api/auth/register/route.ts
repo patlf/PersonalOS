@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, prismaConfigurationError } from '@/lib/prisma'
 import { hashPassword, validatePassword } from '@/lib/password'
 
 export async function POST(request: NextRequest) {
+  if (prismaConfigurationError) {
+    return NextResponse.json(
+      {
+        error: 'Service unavailable',
+        details: prismaConfigurationError,
+      },
+      { status: 503 }
+    )
+  }
+
   try {
     // Parse request body
     let body;
