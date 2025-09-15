@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, prismaConfigurationError } from '@/lib/prisma';
 import { UpdateTaskInput } from '@/lib/types';
 
 interface RouteParams {
@@ -12,6 +12,12 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, context: RouteParams) {
   const params = await context.params;
+  if (prismaConfigurationError) {
+    return NextResponse.json(
+      { error: 'Service unavailable', details: prismaConfigurationError },
+      { status: 503 }
+    );
+  }
   try {
     const session = await getServerSession(authOptions);
     
@@ -69,6 +75,12 @@ export async function GET(request: NextRequest, context: RouteParams) {
 
 export async function PUT(request: NextRequest, context: RouteParams) {
   const params = await context.params;
+  if (prismaConfigurationError) {
+    return NextResponse.json(
+      { error: 'Service unavailable', details: prismaConfigurationError },
+      { status: 503 }
+    );
+  }
   try {
     const session = await getServerSession(authOptions);
     
@@ -195,6 +207,12 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 
 export async function DELETE(request: NextRequest, context: RouteParams) {
   const params = await context.params;
+  if (prismaConfigurationError) {
+    return NextResponse.json(
+      { error: 'Service unavailable', details: prismaConfigurationError },
+      { status: 503 }
+    );
+  }
   try {
     const session = await getServerSession(authOptions);
     
