@@ -1,7 +1,7 @@
 import { Task, CreateTaskInput, UpdateTaskInput, TaskFilters } from '@/lib/types';
 
 // Helper function to parse dates safely, avoiding timezone issues
-function parseDateSafely(dateString: string): Date {
+function parseDateSafely(dateString: string | Date): Date {
   // If it's already a Date object, return it
   if (dateString instanceof Date) {
     const normalized = new Date(dateString);

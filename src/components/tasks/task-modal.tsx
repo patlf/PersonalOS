@@ -253,7 +253,7 @@ export function TaskModal({
   };
 
   const getDateOptions = () => {
-    const options = [];
+    const options: Array<{ value: string; label: string; date: Date }> = [];
     const today = new Date();
     
     // Validate today date

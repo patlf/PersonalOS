@@ -7,8 +7,16 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Productivity Platform",
-  description: "An integrated productivity platform with AI, Tasks, Calendar, and Email management",
+  title: "Personal OS",
+  description: "Your personal operating system for productivity - manage tasks, calendar, and workflows in one unified platform",
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

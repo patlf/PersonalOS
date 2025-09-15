@@ -134,7 +134,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     if (body.scheduledDate !== undefined) {
       if (body.scheduledDate) {
         // Handle date string (YYYY-MM-DD) to avoid timezone issues
-        if (typeof body.scheduledDate === 'string' && body.scheduledDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        if (typeof body.scheduledDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.scheduledDate)) {
           // Create a Date object using UTC noon to avoid timezone shifts
           // This ensures the date stored in PostgreSQL matches the intended date
           updateData.scheduledDate = new Date(body.scheduledDate + 'T12:00:00.000Z');
