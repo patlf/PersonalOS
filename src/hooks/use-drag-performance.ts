@@ -14,7 +14,7 @@ export function useDragPerformance({
   debounceMs = 100,
   enableRAF = true,
 }: DragPerformanceOptions = {}) {
-  const rafIdRef = useRef<number>();
+  const rafIdRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
 
   // Throttled update function for smooth animations
@@ -51,7 +51,7 @@ export function useDragPerformance({
   const cleanup = useCallback(() => {
     if (rafIdRef.current) {
       cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = undefined;
+      rafIdRef.current = null;
     }
     throttledUpdate.cancel();
     debouncedUpdate.cancel();

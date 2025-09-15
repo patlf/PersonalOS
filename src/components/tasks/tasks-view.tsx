@@ -49,8 +49,7 @@ export function TasksView() {
 
   const filteredTasks = getFilteredTasks();
   const somedayTasks = filteredTasks.filter(task => 
-    (task.status === 'someday' || (!task.scheduledDate && task.status !== 'completed')) && 
-    task.status !== 'completed'
+    task.status === 'someday' || (!task.scheduledDate && task.status !== 'completed')
   );
   // Get today's tasks for the calendar - include all tasks scheduled for today
   const todayTasks = getTodayTasks().filter(task => task.status !== 'completed');

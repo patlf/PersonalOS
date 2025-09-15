@@ -62,7 +62,7 @@ function SortableTaskItem({
         onClick={onClick}
         className={className}
         compact={compact}
-        enableDrag={false} // Disable the task card's own dragging since we're using sortable
+        draggable={false} // Disable the task card's own dragging since we're using sortable
       />
     </div>
   );

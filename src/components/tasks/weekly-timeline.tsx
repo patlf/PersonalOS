@@ -60,7 +60,7 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isScrollingProgrammatically = useRef(false);
-  const autoScrollIntervalRef = useRef<NodeJS.Timeout>();
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const shouldAutoScrollRef = useRef(false); // Flag to control when to auto-scroll
   
@@ -106,7 +106,7 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
       // Clear any auto-scroll
       if (autoScrollIntervalRef.current) {
         clearInterval(autoScrollIntervalRef.current);
-        autoScrollIntervalRef.current = undefined;
+        autoScrollIntervalRef.current = null;
       }
     };
 
@@ -160,7 +160,7 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
       // Clear existing auto-scroll
       if (autoScrollIntervalRef.current) {
         clearInterval(autoScrollIntervalRef.current);
-        autoScrollIntervalRef.current = undefined;
+        autoScrollIntervalRef.current = null;
       }
 
       // Auto-scroll right (towards future)
@@ -183,7 +183,7 @@ const WeeklyTimelineComponent = memo(forwardRef<WeeklyTimelineRef, WeeklyTimelin
       document.removeEventListener('mousemove', handleMouseMove);
       if (autoScrollIntervalRef.current) {
         clearInterval(autoScrollIntervalRef.current);
-        autoScrollIntervalRef.current = undefined;
+        autoScrollIntervalRef.current = null;
       }
     };
   }, [isDragging]);
