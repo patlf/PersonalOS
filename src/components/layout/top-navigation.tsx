@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { 
-  Bot, 
-  CheckSquare, 
-  Calendar, 
+import {
+  Bot,
+  CheckSquare,
+  Calendar,
   Mail,
   Menu,
   X
@@ -148,8 +148,8 @@ export function TopNavigation({ className }: TopNavigationProps) {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
         {/* Logo and Navigation */}
         <div className="flex items-center">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="hover:opacity-80 transition-opacity min-w-0 flex-shrink-0"
             onClick={(e) => {
               e.preventDefault();
@@ -158,15 +158,15 @@ export function TopNavigation({ className }: TopNavigationProps) {
           >
             <Logo variant="icon" size="md" />
           </Link>
-          
+
           {/* Separator */}
           <div className="hidden lg:block w-px h-16 bg-border mx-6"></div>
-          
+
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center">
+          <div className="hidden lg:flex items-center gap-1">
             {navigationItems.map((item) => {
               const active = isActive(item.href);
-              
+
               return (
                 <Button
                   key={item.id}
@@ -181,8 +181,8 @@ export function TopNavigation({ className }: TopNavigationProps) {
                 >
                   <span className="truncate">{item.label}</span>
                   {item.shortcut && (
-                    <KeyboardShortcut 
-                      keys={item.shortcut} 
+                    <KeyboardShortcut
+                      keys={item.shortcut}
                       className="ml-1 opacity-60"
                     />
                   )}
@@ -200,12 +200,12 @@ export function TopNavigation({ className }: TopNavigationProps) {
 
         {/* Tablet Separator */}
         <div className="hidden md:block lg:hidden w-px h-16 bg-border mx-6"></div>
-        
+
         {/* Tablet Navigation (md to lg) */}
         <div className="hidden md:flex lg:hidden items-center">
           {navigationItems.map((item) => {
             const active = isActive(item.href);
-            
+
             return (
               <Button
                 key={item.id}
@@ -237,7 +237,7 @@ export function TopNavigation({ className }: TopNavigationProps) {
         {/* Right Side Controls */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <ThemeToggle variant="ghost" size="sm" className="h-8 w-8 sm:h-9 sm:w-9" />
-          
+
           {session?.user && <UserAvatar />}
 
           {/* Mobile Menu */}
@@ -257,8 +257,8 @@ export function TopNavigation({ className }: TopNavigationProps) {
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent 
-              side="right" 
+            <SheetContent
+              side="right"
               className="w-[280px] sm:w-80 p-0"
               data-mobile-menu
             >
@@ -273,7 +273,7 @@ export function TopNavigation({ className }: TopNavigationProps) {
                 <div className="flex-1 p-4 space-y-2 overflow-y-auto">
                   {navigationItems.map((item) => {
                     const active = isActive(item.href);
-                    
+
                     return (
                       <Button
                         key={item.id}
@@ -289,8 +289,8 @@ export function TopNavigation({ className }: TopNavigationProps) {
                         <div className="flex flex-col items-start flex-1 min-w-0">
                           <span className="truncate">{item.label}</span>
                           {item.shortcut && (
-                            <KeyboardShortcut 
-                              keys={item.shortcut} 
+                            <KeyboardShortcut
+                              keys={item.shortcut}
                               className="mt-1 opacity-60"
                             />
                           )}

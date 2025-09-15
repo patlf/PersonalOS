@@ -35,12 +35,12 @@ export function DropZoneIndicator({
       data-container-id={id}
       className={cn(
         'relative transition-all duration-300 ease-out',
-        // Always ensure minimum height for ghost visibility
-        'min-h-[200px]',
+        // Minimum height based on compact mode
+        compact ? 'min-h-[46px]' : 'min-h-[200px]',
         
         // For containers with content, ensure padding for ghost visibility
         'rounded-lg',
-        'pb-4', // Extra padding at bottom for ghost
+        compact ? 'pb-1' : 'pb-4', // Less padding for compact mode
         
         className
       )}

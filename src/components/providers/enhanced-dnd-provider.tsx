@@ -97,8 +97,6 @@ export function EnhancedDndProvider({
       result = [];
     }
     
-    // Container tasks calculated
-    
     return result;
   }, [tasks]);
 
@@ -114,7 +112,9 @@ export function EnhancedDndProvider({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5, // Small distance for responsive dragging
+        distance: 8, // Small distance to prevent accidental drags
+        delay: 100, // Small delay for better UX
+        tolerance: 5, // Small tolerance for touch devices
       },
     }),
     useSensor(KeyboardSensor, {
@@ -173,8 +173,6 @@ export function EnhancedDndProvider({
     const { active } = event;
     const task = tasks.find(t => t.id === active.id);
     
-    // Drag start detected
-    
     didDragRef.current = true;
     setActiveTask(task || null);
     setGhostPosition(null);
@@ -221,8 +219,7 @@ export function EnhancedDndProvider({
 
     const overId = over.id as string;
     const activeId = active.id as string;
-    
-    // Drag over detected
+
 
     // Determine target container
     let targetContainerId = overId;
@@ -317,8 +314,6 @@ export function EnhancedDndProvider({
       index: Math.max(0, insertionIndex)
     };
     
-    // Ghost position calculated
-    
     // Only update if position actually changed to avoid unnecessary re-renders
     setGhostPosition(prev => {
       if (!prev || 
@@ -375,24 +370,15 @@ export function EnhancedDndProvider({
         onTaskMove?.(taskId, targetDate);
       }
     } else if (overId.startsWith('timeslot-')) {
-      console.log('🎯 Timeslot drop detected:', overId);
       const parts = overId.replace('timeslot-', '').split('-');
-      console.log('📝 Parsed parts:', parts);
       if (parts.length >= 5) {
         const dateString = `${parts[0]}-${parts[1]}-${parts[2]}`;
         const timeString = `${parts[3]}:${parts[4]}`;
         const targetDate = parseDateFromId(dateString);
         
-        console.log('📅 Parsed date and time:', { dateString, timeString, targetDate });
-        
         if (!isNaN(targetDate.getTime())) {
-          console.log('✅ Calling onTaskMove with:', { taskId, targetDate, timeString });
           onTaskMove?.(taskId, targetDate, timeString);
-        } else {
-          console.error('❌ Invalid target date:', targetDate);
         }
-      } else {
-        console.error('❌ Invalid timeslot format, expected 5+ parts, got:', parts.length);
       }
     }
   }, [tasks, getContainerTasks, onTaskReorder, onTaskUpdate, onTaskMove]);
@@ -417,10 +403,7 @@ export function EnhancedDndProvider({
       >
         {children}
         <DragOverlay
-          dropAnimation={{
-            duration: 400,
-            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', // Smooth ease-out
-          }}
+          dropAnimation={null} // Disable drop animation to prevent flying effect
           style={{
             transformOrigin: '0 0',
           }}

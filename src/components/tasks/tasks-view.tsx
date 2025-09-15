@@ -152,41 +152,20 @@ export function TasksView() {
 
 
   const handleTaskMove = async (taskId: string, newDate: Date, newTime?: string) => {
-    console.log('🚀 handleTaskMove called:', { taskId, newDate, newTime });
     await executeWithErrorHandling(async () => {
-      // Check if task is being moved to past date (overdue)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const taskDate = new Date(newDate);
-      taskDate.setHours(0, 0, 0, 0);
-      
-      // If moving to today's schedule with a specific time, always use today's date
-      if (newTime) {
-        console.log('📅 Using today\'s date for timeslot');
-        // Always use today when scheduling to a specific time
-        newDate = new Date();
-        newDate.setHours(0, 0, 0, 0);
-      }
-      
       const updateData = {
         scheduledDate: newDate,
         scheduledTime: newTime,
         status: 'scheduled' as const,
       };
       
-      console.log('💾 Updating task with:', updateData);
-      
       await updateTaskMutation.mutateAsync({
         id: taskId,
         input: updateData,
       });
       
-      console.log('✅ Task update successful');
-      
       if (newTime) {
-        showSuccessToast(`Task scheduled for ${newTime} today`);
-      } else if (taskDate < today) {
-        showSuccessToast('Task moved to overdue');
+        showSuccessToast(`Task scheduled for ${newTime}`);
       } else {
         showSuccessToast('Task scheduled successfully');
       }

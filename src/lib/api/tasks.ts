@@ -4,12 +4,16 @@ import { Task, CreateTaskInput, UpdateTaskInput, TaskFilters } from '@/lib/types
 function parseDateSafely(dateString: string): Date {
   // If it's already a Date object, return it
   if (dateString instanceof Date) {
-    return dateString;
+    const normalized = new Date(dateString);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
   }
   
-  // If it's an ISO string (YYYY-MM-DDTHH:mm:ss.sssZ), parse it normally
+  // If it's an ISO string (YYYY-MM-DDTHH:mm:ss.sssZ), parse it and normalize
   if (typeof dateString === 'string' && dateString.includes('T')) {
-    return new Date(dateString);
+    const date = new Date(dateString);
+    date.setHours(0, 0, 0, 0);
+    return date;
   }
   
   // If it's a date-only string (YYYY-MM-DD), parse it in local timezone
@@ -18,8 +22,10 @@ function parseDateSafely(dateString: string): Date {
     return new Date(year, month - 1, day, 0, 0, 0, 0);
   }
   
-  // Fallback to normal Date parsing
-  return new Date(dateString);
+  // Fallback to normal Date parsing with normalization
+  const date = new Date(dateString);
+  date.setHours(0, 0, 0, 0);
+  return date;
 }
 
 const API_BASE = '/api/tasks';

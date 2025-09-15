@@ -118,7 +118,16 @@ export async function POST(request: NextRequest) {
         description: body.description?.trim() || null,
         estimatedDuration: body.estimatedDuration || 60,
         status: body.status || 'someday',
-        scheduledDate: body.scheduledDate || null,
+        scheduledDate: body.scheduledDate ? (() => {
+          // Handle date string (YYYY-MM-DD) to avoid timezone issues
+          if (typeof body.scheduledDate === 'string' && body.scheduledDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // Create a Date object using UTC noon to avoid timezone shifts
+            // This ensures the date stored in PostgreSQL matches the intended date
+            return new Date(body.scheduledDate + 'T12:00:00.000Z');
+          } else {
+            return new Date(body.scheduledDate);
+          }
+        })() : null,
         scheduledTime: body.scheduledTime ? (() => {
           const timeStr = body.scheduledTime.includes(':') 
             ? (body.scheduledTime.split(':').length === 2 ? `${body.scheduledTime}:00` : body.scheduledTime)

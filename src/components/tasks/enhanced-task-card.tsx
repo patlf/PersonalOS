@@ -68,8 +68,8 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
 
         // Overdue task styling - stronger red background and border
         isOverdue && !isCompleted && [
-          'bg-red-100',
-          '!border-red-300',
+          'bg-red-100 dark:bg-red-950',
+          '!border-red-300 dark:!border-red-900',
         ],
 
         // Completed task styling - but not for overdue tasks to preserve red styling
@@ -82,8 +82,8 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
         // Completed overdue task styling - lighter opacity to show it's done but keep red theme
         isCompleted && isOverdue && [
           'opacity-70',
-          'bg-red-50',
-          'border-red-200'
+          'bg-red-50 dark:bg-red-500',
+          'border-red-200 dark:border-red-800'
         ],
 
         // Whole card is draggable and clickable
@@ -115,10 +115,10 @@ const EnhancedTaskCardComponent = memo(function EnhancedTaskCard({
               "flex items-center justify-center",
               isCompleted
                 ? isOverdue
-                  ? "bg-red-300 border-red-300 text-white hover:bg-red-400"
+                  ? "bg-red-300 dark:bg-red-600 border-red-300 dark:border-red-600 text-white hover:bg-red-400 dark:hover:bg-red-500"
                   : "bg-green-500 border-green-500 text-white hover:bg-green-600"
                 : isOverdue
-                  ? "!border-red-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950"
+                  ? "!border-red-300 dark:!border-red-700 hover:border-red-400 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-950"
                   : "border-muted-foreground/40 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950"
             )}
             title={isCompleted ? "Mark as incomplete" : "Mark as complete"}

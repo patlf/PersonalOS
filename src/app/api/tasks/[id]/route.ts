@@ -106,9 +106,6 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 
     const body: Partial<UpdateTaskInput> = await request.json();
     
-    console.log('🔧 API: Received update request for task:', params.id);
-    console.log('📝 API: Update body:', body);
-    
     // Prepare update data
     const updateData: any = {};
     
@@ -135,7 +132,18 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     }
     
     if (body.scheduledDate !== undefined) {
-      updateData.scheduledDate = body.scheduledDate;
+      if (body.scheduledDate) {
+        // Handle date string (YYYY-MM-DD) to avoid timezone issues
+        if (typeof body.scheduledDate === 'string' && body.scheduledDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          // Create a Date object using UTC noon to avoid timezone shifts
+          // This ensures the date stored in PostgreSQL matches the intended date
+          updateData.scheduledDate = new Date(body.scheduledDate + 'T12:00:00.000Z');
+        } else {
+          updateData.scheduledDate = new Date(body.scheduledDate);
+        }
+      } else {
+        updateData.scheduledDate = null;
+      }
     }
     
     if (body.scheduledTime !== undefined) {
@@ -158,14 +166,10 @@ export async function PUT(request: NextRequest, context: RouteParams) {
       updateData.priority = body.priority;
     }
 
-    console.log('💾 API: Final update data:', updateData);
-    
     const updatedTask = await prisma.task.update({
       where: { id: params.id },
       data: updateData,
     });
-    
-    console.log('✅ API: Task updated successfully:', updatedTask.id);
 
     // Format the response
     const formattedTask = {
@@ -180,11 +184,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 
     return NextResponse.json(formattedTask);
   } catch (error) {
-    console.error('❌ API: Error updating task:', error);
-    console.error('❌ API: Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-    });
+    console.error('Error updating task:', error);
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

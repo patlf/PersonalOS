@@ -161,7 +161,7 @@ export function UnifiedTaskContainer({
         showIndicator={visibleTasks.length === 0}
         label={visibleTasks.length === 0 ? emptyMessage : undefined}
       >
-        <div className="space-y-2 min-h-[100px]">
+        <div className={cn("space-y-2", compact ? "min-h-[46px]" : "min-h-[100px]")}>
           {/* Show ghost for empty containers */}
           {shouldShowGhost && ghostPosition && visibleTasks.length === 0 && activeTask && (
             <div 

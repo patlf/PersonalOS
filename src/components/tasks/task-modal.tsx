@@ -143,12 +143,6 @@ export function TaskModal({
           const isoString = dateToISOString(formData.scheduledDate);
           updates.scheduledDate = isoString as any;
           updates.scheduledTime = formData.scheduledTime || undefined;
-          
-          console.log('🔧 Updating task with date:', {
-            originalDate: formData.scheduledDate,
-            isoString: isoString,
-            updates: updates
-          });
         } else {
           // For completed tasks, preserve their completion status and current scheduling
           // but allow updating the scheduled time if it's set in the form
@@ -171,12 +165,7 @@ export function TaskModal({
           priority: formData.priority,
           tags: formData.tags,
         };
-        
-        console.log('🆕 Creating task with date:', {
-          originalDate: formData.scheduledDate,
-          isoString: isoString,
-          taskData: taskData
-        });
+
         onSubmit(taskData);
       }
       onClose();
@@ -212,14 +201,17 @@ export function TaskModal({
     }
   };
 
-  // Helper function to convert Date to ISO string safely (for Prisma DateTime)
+  // Helper function to convert Date to ISO date string safely (for Prisma Date field)
   const dateToISOString = (date: Date | null): string | undefined => {
     if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
       return undefined;
     }
-    // Create a new date at noon in local timezone to avoid timezone issues
-    const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0);
-    return localDate.toISOString();
+    // Format as YYYY-MM-DD to avoid timezone conversion issues
+    // This ensures the date stays the same regardless of timezone
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const formatDateForDisplay = (date: Date) => {
@@ -256,7 +248,6 @@ export function TaskModal({
         day: 'numeric' 
       });
     } catch (error) {
-      console.error('Error formatting date:', error);
       return 'Invalid Date';
     }
   };
@@ -267,7 +258,6 @@ export function TaskModal({
     
     // Validate today date
     if (isNaN(today.getTime())) {
-      console.error('Invalid today date');
       return options;
     }
     
@@ -280,7 +270,6 @@ export function TaskModal({
       
       // Validate the generated date
       if (isNaN(date.getTime())) {
-        console.error('Invalid date generated for day', i);
         continue;
       }
       
@@ -331,7 +320,7 @@ export function TaskModal({
           options.splice(insertIndex, 0, scheduledOption);
         }
       } catch (error) {
-        console.error('Error processing scheduled date:', error);
+        // Silently handle error
       }
     }
     
@@ -339,8 +328,6 @@ export function TaskModal({
   };
 
   const handleDateChange = (value: string) => {
-    console.log('📅 Date selection changed:', value);
-    
     if (value === 'someday') {
       setFormData(prev => ({ 
         ...prev, 
@@ -351,14 +338,6 @@ export function TaskModal({
       // Parse date string (YYYY-MM-DD) directly in local timezone to avoid timezone issues
       const [year, month, day] = value.split('-').map(Number);
       const selectedDate = new Date(year, month - 1, day, 0, 0, 0, 0); // month is 0-indexed
-      
-      console.log('📅 Parsed date:', {
-        inputValue: value,
-        parsedComponents: { year, month, day },
-        createdDate: selectedDate,
-        dateString: selectedDate.toDateString(),
-        isoString: selectedDate.toISOString()
-      });
       
       setFormData(prev => ({ 
         ...prev, 

@@ -1,17 +1,73 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { DroppableArea } from './droppable-area';
-import { UnifiedTaskContainer } from './unified-task-container';
+import { TaskCard } from './task-card';
 import { Task } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { formatDateForId, isToday } from '@/lib/date-utils';
+import { formatDateForId } from '@/lib/date-utils';
+import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useMemo } from 'react';
 
 interface TimeSlot {
   time: string;
   hour: number;
   minute: number;
   tasks: Task[];
+}
+
+interface DraggableTimeSlotTaskProps {
+  task: Task;
+  onTaskClick?: (task: Task) => void;
+  onToggleComplete?: (taskId: string, completed: boolean) => void;
+}
+
+function DraggableTimeSlotTask({ task, onTaskClick, onToggleComplete }: DraggableTimeSlotTaskProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id: task.id,
+    data: {
+      type: 'task',
+      task,
+    }
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? 'none' : (transition || 'transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'),
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'touch-none transform-gpu will-change-transform task-card-hover',
+        isDragging 
+          ? 'opacity-30 z-50 animate-drag-lift' 
+          : 'opacity-100 hover:shadow-sm'
+      )}
+      data-task-id={task.id}
+      {...attributes}
+      {...listeners}
+    >
+      <TaskCard
+        task={task}
+        onClick={() => onTaskClick?.(task)}
+        onToggleComplete={onToggleComplete}
+        compact={true}
+        className="transform-gpu will-change-transform"
+        draggable={true}
+        isDragging={isDragging}
+      />
+    </div>
+  );
 }
 
 interface TimeBlockingSidebarProps {
@@ -79,15 +135,16 @@ export function TimeBlockingSidebar({
       {/* Calendar Day View */}
       <div className="flex-1 overflow-auto bg-background">
         {timeSlots.map((slot) => {
-          const slotId = `timeslot-${getTodayDateString()}-${slot.time.replace(':', '-')}`;
-          const hasItems = slot.tasks.length > 0;
+          const todayDateString = getTodayDateString();
+          const slotId = `timeslot-${todayDateString}-${slot.time.replace(':', '-')}`;
+          
+          // Create task IDs for SortableContext
+          const taskIds = useMemo(() => slot.tasks.map(task => task.id), [slot.tasks]);
 
           return (
-            <DroppableArea
+            <div 
               key={slot.time}
-              id={slotId}
               className="border-b border-border/30 hover:bg-muted/30 transition-colors"
-              activeClassName="bg-blue-50/50 dark:bg-blue-950/50"
             >
               <div className="flex min-h-[50px]">
                 {/* Time label */}
@@ -97,29 +154,42 @@ export function TimeBlockingSidebar({
                   </div>
                 </div>
 
-                {/* Content area */}
-                <div className="flex-1 p-2 relative">
-                  {/* Task blocks - Use UnifiedTaskContainer for drag functionality */}
-                  {slot.tasks.length > 0 && (
-                    <UnifiedTaskContainer
-                      containerId={slotId}
-                      tasks={slot.tasks}
-                      onTaskClick={onTaskClick}
-                      onToggleComplete={onToggleComplete}
-                      enableSorting={false}
-                      compact={true}
-                      emptyMessage=""
-                      className="space-y-1"
-                    />
-                  )}
-
-                  {/* Empty state - invisible but maintains droppable area */}
-                  {!hasItems && (
-                    <div className="h-full min-h-[46px] w-full" />
-                  )}
-                </div>
+                {/* Content area - Use DroppableArea directly around the content */}
+                <DroppableArea
+                  id={slotId}
+                  className="flex-1 p-2 relative min-h-[46px] transition-all duration-200"
+                  activeClassName="bg-blue-50/70 dark:bg-blue-950/70 ring-1 ring-blue-200 dark:ring-blue-800"
+                >
+                  <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-1 task-container" data-container-id={slotId}>
+                      {/* Render draggable tasks with smooth animations */}
+                      {slot.tasks.map((task, index) => (
+                        <div
+                          key={task.id}
+                          className="task-item animate-in fade-in-0 slide-in-from-top-1 duration-200"
+                          style={{ animationDelay: `${index * 30}ms` }}
+                        >
+                          <DraggableTimeSlotTask
+                            task={task}
+                            onTaskClick={onTaskClick}
+                            onToggleComplete={onToggleComplete}
+                          />
+                        </div>
+                      ))}
+                      
+                      {/* Empty state indicator */}
+                      {slot.tasks.length === 0 && (
+                        <div className="flex items-center justify-center h-[46px] text-xs text-muted-foreground/60 transition-all duration-200 hover:text-muted-foreground/80">
+                          <span className="px-2 py-1 rounded-md border border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors">
+                            Drop task here
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </SortableContext>
+                </DroppableArea>
               </div>
-            </DroppableArea>
+            </div>
           );
         })}
       </div>

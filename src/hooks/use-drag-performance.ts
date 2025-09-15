@@ -86,7 +86,7 @@ export function useDragPerformance({
       const start = performance.now();
       fn();
       const end = performance.now();
-      console.debug(`${name} took ${end - start} milliseconds`);
+      // Performance timing removed for production
     },
   }), [throttledUpdate, debouncedUpdate, cleanup]);
 
