@@ -192,6 +192,8 @@ describe('System Theme Detection Tests', () => {
         throw new Error('matchMedia not supported');
       });
 
+      // Should not throw and return fallback
+      expect(() => getSystemTheme()).not.toThrow();
       expect(getSystemTheme()).toBe('light'); // Fallback
     });
   });
