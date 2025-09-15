@@ -57,23 +57,27 @@ export function TasksView() {
   
   // Get all tasks for someday column (including overdue and someday tasks)
   const somedayTasks = filteredTasks.filter(task => {
-    if (task.status === 'completed') return false;
+    // Skip completed tasks
+    if (task.status === 'completed') {
+      return false;
+    }
     
     // Include someday tasks
-    if (task.status === 'someday' || (!task.scheduledDate && task.status !== 'completed')) {
+    if (task.status === 'someday') {
       return true;
     }
     
-    // Include overdue tasks
-    if (task.scheduledDate && task.status !== 'someday') {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const taskDate = new Date(task.scheduledDate);
-      taskDate.setHours(0, 0, 0, 0);
-      return taskDate < today;
+    // Include tasks without scheduled date (regardless of status)
+    if (!task.scheduledDate) {
+      return true;
     }
     
-    return false;
+    // Include overdue tasks (tasks with scheduled date in the past)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const taskDate = new Date(task.scheduledDate);
+    taskDate.setHours(0, 0, 0, 0);
+    return taskDate < today;
   });
   // Get today's tasks for the calendar - include all tasks scheduled for today
   const todayTasks = getTodayTasks().filter(task => task.status !== 'completed');
@@ -476,9 +480,6 @@ export function TasksView() {
           onSubmit={taskModalMode === 'create' ? handleCreateTaskFromModal : undefined}
           onSave={taskModalMode === 'edit' ? handleTaskSave : undefined}
           onToggleComplete={handleToggleComplete}
-          onDuplicate={handleTaskDuplicate}
-          onDelete={handleTaskDelete}
-          onSendToSomeday={handleSendToSomeday}
           prefilledDate={prefilledDate}
           title={modalTitle}
           isLoading={updateTaskMutation.isPending || createTaskMutation.isPending}
